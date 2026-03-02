@@ -1,0 +1,56 @@
+<div class="chart-container">
+  <div class="chart-header">
+    <div>
+      <h3>Demanda vs Predicción</h3>
+      <p>Comparación entre datos históricos y proyecciones futuras</p>
+    </div>
+    <div class="chart-controls">
+      <button mat-stroked-button>
+        <mat-icon>download</mat-icon>
+        Exportar
+      </button>
+      <button mat-stroked-button>
+        <mat-icon>filter_list</mat-icon>
+        Filtros
+      </button>
+    </div>
+  </div>
+  
+  <div id="chart">
+    <apx-chart 
+      [series]="chartOptions.series"
+      [chart]="chartOptions.chart"
+      [xaxis]="chartOptions.xaxis"
+      [yaxis]="chartOptions.yaxis"
+      [stroke]="chartOptions.stroke"
+      [dataLabels]="chartOptions.dataLabels"
+      [grid]="chartOptions.grid"
+      [markers]="chartOptions.markers"
+      [title]="chartOptions.title"
+      [legend]="chartOptions.legend"
+      [tooltip]="chartOptions.tooltip"
+      [annotations]="chartOptions.annotations">
+    </apx-chart>
+  </div>
+  
+  <div class="chart-footer">
+    <div class="legend-info">
+      <div class="legend-item">
+        <div class="legend-color historical"></div>
+        <span>Datos Históricos Reales</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color prediction"></div>
+        <span>Predicción Basada en Histórico</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color projection"></div>
+        <span>Proyección a 16 Semanas</span>
+      </div>
+    </div>
+    <div class="accuracy-info">
+      <mat-icon>verified</mat-icon>
+      <span>Precisión del modelo: <strong>94.2%</strong></span>
+    </div>
+  </div>
+</div>

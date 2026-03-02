@@ -1,0 +1,143 @@
+<mat-sidenav-container class="sidebar-container">
+  <mat-sidenav mode="side" opened class="sidebar" [style.width.px]="isCollapsed ? 70 : 280">
+    <div class="sidebar-header">
+      <h3 *ngIf="!isCollapsed">Herramientas</h3>
+      <button mat-icon-button (click)="toggleCollapse()" class="collapse-button">
+        <mat-icon>{{ isCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="sidebar-content" [class.collapsed]="isCollapsed">
+
+      
+
+
+<!-- File Upload Section -->
+<div class="sidebar-section" *ngIf="!isCollapsed">
+  <h4 class="section-title">
+    <mat-icon>cloud_upload</mat-icon>
+    Carga de Datos CSV
+  </h4>
+  
+  <!-- Estado de Carga -->
+  <div *ngIf="isUploading" class="upload-progress">
+    <div class="upload-header">
+      <mat-icon>file_upload</mat-icon>
+      <span>Procesando archivo...</span>
+    </div>
+    
+    <div class="file-info">
+      <span class="file-name">{{ fileName }}</span>
+    </div>
+    
+    <!-- Barra de Progreso -->
+    <div class="progress-container">
+      <div class="progress-bar" [style.width.%]="uploadProgress"></div>
+    </div>
+    
+    <div class="progress-text">
+      {{ uploadProgress }}% completado
+    </div>
+    
+    <button mat-button color="warn" (click)="cancelUpload()" class="cancel-btn">
+      <mat-icon>cancel</mat-icon>
+      Cancelar
+    </button>
+  </div>
+  
+  <!-- Error de Carga -->
+  <div *ngIf="uploadError && !isUploading" class="upload-error">
+    <mat-icon>error</mat-icon>
+    <span>{{ uploadError }}</span>
+    <button mat-icon-button (click)="uploadError = ''">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <!-- Área de Carga -->
+  <div class="file-upload-area" 
+       [class.uploading]="isUploading"
+       (click)="!isUploading && fileInput.click()"
+       (dragover)="!isUploading && $event.preventDefault()"
+       (drop)="!isUploading && handleDrop($event)">
+    
+    <div *ngIf="!isUploading" class="upload-content">
+      <mat-icon>cloud_upload</mat-icon>
+      <p>Arrastra tu archivo CSV aquí</p>
+      <span class="file-types">CSV, XLS, XLSX (máx. 10MB)</span>
+      <button mat-stroked-button class="browse-btn">
+        <mat-icon>folder_open</mat-icon>
+        Seleccionar archivo
+      </button>
+    </div>
+    
+    <input #fileInput type="file" accept=".csv,.xlsx,.xls" 
+           (change)="onFileUpload($event)" hidden>
+  </div>
+  
+  <!-- Info CSV -->
+  <div class="csv-info">
+    <mat-icon>info</mat-icon>
+    <p>Formato esperado: CSV con separador ; y columnas: UPC, Código, Flags, Descripción</p>
+  </div>
+</div>
+
+
+      <mat-divider *ngIf="!isCollapsed"></mat-divider>
+
+      <!-- Product Search -->
+      <div class="sidebar-section">
+        <h4 class="section-title" *ngIf="!isCollapsed">
+          <mat-icon>search</mat-icon>
+          Búsqueda de Producto
+        </h4>
+        <div class="search-container">
+          <mat-form-field appearance="outline" class="search-field" *ngIf="!isCollapsed">
+            <mat-label>Código de Producto</mat-label>
+            <input matInput [(ngModel)]="searchQuery" placeholder="Ej: PROD-001">
+            <mat-icon matSuffix>tag</mat-icon>
+          </mat-form-field>
+          
+          <button mat-icon-button class="search-button-icon" *ngIf="isCollapsed" (click)="onSearch()">
+            <mat-icon>search</mat-icon>
+          </button>
+          
+          <button mat-raised-button color="primary" class="search-button" *ngIf="!isCollapsed" (click)="onSearch()">
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
+        </div>
+      </div>
+
+      <!-- Predict Button -->
+      <div class="predict-section">
+        <button mat-raised-button color="accent" class="predict-button" (click)="onPredict()" [class.collapsed]="isCollapsed">
+          <mat-icon>trending_up</mat-icon>
+          <span *ngIf="!isCollapsed">Predecir</span>
+        </button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="sidebar-section" *ngIf="!isCollapsed">
+        <h4 class="section-title">
+          <mat-icon>flash_on</mat-icon>
+          Acciones Rápidas
+        </h4>
+        <button mat-stroked-button class="quick-action">
+          <mat-icon>history</mat-icon>
+          Historial
+        </button>
+        <button mat-stroked-button class="quick-action">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+        <button mat-stroked-button class="quick-action">
+          <mat-icon>notifications</mat-icon>
+          Alertas
+        </button>
+      </div>
+    </div>
+  </mat-sidenav>
+</mat-sidenav-container>

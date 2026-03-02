@@ -1,0 +1,209 @@
+<div class="csv-viewer-container">
+  <!-- Header -->
+  <div class="csv-header">
+    <div>
+      <h2>Productos Cargados desde CSV</h2>
+      <p>{{ csvProducts.length }} productos cargados correctamente</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="clearFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar Filtros
+      </button>
+      <button mat-raised-button color="primary">
+        <mat-icon>download</mat-icon>
+        Exportar CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar producto...</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" 
+               placeholder="Buscar por UPC, código o descripción">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group">
+      <mat-form-field appearance="outline" class="category-filter">
+        <mat-label>Categoría</mat-label>
+        <mat-select [(value)]="selectedCategory" (selectionChange)="applyFilter()">
+          <mat-option value="all">Todas las categorías</mat-option>
+          <mat-option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>category</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="stats-badge">
+      <mat-icon>list_alt</mat-icon>
+      <span>Mostrando {{ paginatedProducts.length }} de {{ filteredProducts.length }} productos</span>
+    </div>
+  </div>
+
+  <!-- Tabla de Productos -->
+  <div class="table-container">
+    <table mat-table [dataSource]="paginatedProducts" class="csv-table">
+      
+      <!-- UPC Column -->
+      <ng-container matColumnDef="upc">
+        <th mat-header-cell *matHeaderCellDef> UPC </th>
+        <td mat-cell *matCellDef="let product">
+          <div class="upc-cell">
+            <span class="upc-value">{{ product.upc }}</span>
+<button mat-icon-button color="primary" class="copy-btn" 
+        matTooltip="Copiar UPC" (click)="copyToClipboard(product.upc)">
+
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Código WM2 Column -->
+      <ng-container matColumnDef="codigoWM2">
+        <th mat-header-cell *matHeaderCellDef> Código WM2 </th>
+        <td mat-cell *matCellDef="let product">
+          <span class="code-badge">{{ product.codigoWM2 }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Descripción Column -->
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef> Descripción </th>
+        <td mat-cell *matCellDef="let product">
+          <div class="description-cell">
+            <strong>{{ product.cleanName || product.descripcion }}</strong>
+            <span class="original-desc" *ngIf="product.cleanName">
+              Original: {{ product.descripcion }}
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Categoría Column -->
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef> Categoría </th>
+        <td mat-cell *matCellDef="let product">
+            <span class="category-badge" [style.background-color]="getCategoryColor(product.category)">
+                {{ product.category || 'Sin categoría' }}
+            </span>
+          
+        </td>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let product">
+          <div class="action-buttons">
+            <button mat-icon-button color="primary" (click)="analyzeProduct(product)"
+                    matTooltip="Analizar producto">
+              <mat-icon>analytics</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" (click)="analyzeProduct(product)"
+                    matTooltip="Ver predicciones">
+              <mat-icon>trending_up</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="analyzeProduct(product)"
+                    matTooltip="Marcar para seguimiento">
+              <mat-icon>star</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- Sin resultados -->
+    <div *ngIf="filteredProducts.length === 0" class="no-results">
+      <mat-icon>search_off</mat-icon>
+      <h3>No se encontraron productos</h3>
+      <p>Intenta con otros términos de búsqueda o selecciona otra categoría</p>
+      <button mat-stroked-button (click)="clearFilters()">
+        <mat-icon>refresh</mat-icon>
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <div class="pagination-container" *ngIf="filteredProducts.length > 0">
+    <div class="pagination-info">
+      {{ (currentPage * pageSize > filteredProducts.length) ? filteredProducts.length : currentPage * pageSize }} de {{ filteredProducts.length }} productos
+    </div>
+    
+    <div class="pagination-controls">
+      <button mat-icon-button (click)="prevPage()" [disabled]="currentPage === 1">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      
+      <div class="page-numbers">
+        <button mat-button *ngFor="let page of getPageNumbers()" 
+                [class.active]="page === currentPage"
+                (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </div>
+      
+      <button mat-icon-button (click)="nextPage()" [disabled]="currentPage === totalPages">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <div class="page-size-selector">
+      <mat-form-field appearance="outline">
+        <mat-label>Productos por página</mat-label>
+        <mat-select [(value)]="pageSize" (selectionChange)="currentPage = 1; calculatePages()">
+          <mat-option [value]="10">10</mat-option>
+          <mat-option [value]="25">25</mat-option>
+          <mat-option [value]="50">50</mat-option>
+          <mat-option [value]="100">100</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Resumen -->
+  <div class="summary-section" *ngIf="csvProducts.length > 0">
+    <div class="summary-card">
+      <mat-icon>inventory_2</mat-icon>
+      <div>
+        <h4>Resumen de Carga</h4>
+        <p>{{ csvProducts.length }} productos procesados</p>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <mat-icon>category</mat-icon>
+      <div>
+        <h4>Categorías Detectadas</h4>
+        <p>{{ categories.length }} categorías identificadas</p>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        <h4>Estado</h4>
+        <p>Listo para análisis predictivo</p>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <mat-icon>update</mat-icon>
+      <div>
+        <h4>Última Actualización</h4>
+        <p>{{ currentDate | date:'medium' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

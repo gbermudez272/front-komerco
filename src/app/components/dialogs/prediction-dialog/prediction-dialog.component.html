@@ -1,0 +1,125 @@
+<h2 mat-dialog-title>
+  <mat-icon>analytics</mat-icon>
+  {{ data.title || 'Análisis Predictivo Detallado' }}
+</h2>
+
+<mat-dialog-content>
+  <!-- Para análisis de producto específico -->
+  <div *ngIf="data.product" class="product-info-section">
+    <div class="product-header">
+      <h3>{{ data.product.name }}</h3>
+      <span class="product-id">{{ data.product.id }}</span>
+    </div>
+    
+    <div class="product-metrics">
+      <div class="metric">
+        <span class="label">Categoría:</span>
+        <span class="value">{{ data.product.category }}</span>
+      </div>
+      <div class="metric">
+        <span class="label">Stock Actual:</span>
+        <span class="value">{{ data.product.currentStock | number }} unidades</span>
+      </div>
+      <div class="metric">
+        <span class="label">Demanda Semanal:</span>
+        <span class="value">{{ data.product.weeklyDemand | number }} unidades</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Para análisis de tendencias -->
+  <div *ngIf="data.type === 'trends'" class="trends-section">
+    <h3>Resumen de Tendencias</h3>
+    
+    <div class="trend-metrics">
+      <div class="trend-metric">
+        <div class="metric-value">{{ data.trends.totalProducts }}</div>
+        <div class="metric-label">Productos Analizados</div>
+      </div>
+      
+      <div class="trend-metric">
+        <div class="metric-value">{{ data.trends.categoryDistribution.length }}</div>
+        <div class="metric-label">Categorías</div>
+      </div>
+    </div>
+
+    <div class="category-distribution">
+      <h4>Distribución por Categoría</h4>
+      <div class="distribution-list">
+        <div *ngFor="let category of data.trends.categoryDistribution" class="category-item">
+          <span class="category-name">{{ category.name }}</span>
+          <div class="category-bar">
+            <div class="bar-fill" [style.width.%]="category.percentage"></div>
+          </div>
+          <span class="category-percentage">{{ category.percentage }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pronóstico semanal -->
+  <div *ngIf="data.predictions?.weeklyForecast" class="forecast-section">
+    <h3>Pronóstico de Demanda (12 semanas)</h3>
+    
+    <div class="forecast-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Semana</th>
+            <th>Demanda Pronosticada</th>
+            <th>Nivel de Confianza</th>
+            <th>Recomendación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let forecast of data.predictions.weeklyForecast">
+            <td>{{ forecast.week }}</td>
+            <td>{{ forecast.predicted | number }} unidades</td>
+            <td>
+              <span class="confidence-badge" [class.high]="forecast.confidence > 90"
+                    [class.medium]="forecast.confidence >= 80 && forecast.confidence <= 90"
+                    [class.low]="forecast.confidence < 80">
+                {{ forecast.confidence | number:'1.0-1' }}%
+              </span>
+            </td>
+<td>
+{{ getRecommendationText(forecast.predicted, forecast.confidence) }}
+</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recomendaciones -->
+  <div *ngIf="data.predictions?.recommendations" class="recommendations-section">
+    <h3>Recomendaciones de Gestión</h3>
+    
+    <mat-list>
+      <mat-list-item *ngFor="let recommendation of data.predictions.recommendations">
+        <mat-icon matListIcon>check_circle</mat-icon>
+        <div matLine>{{ recommendation }}</div>
+      </mat-list-item>
+    </mat-list>
+  </div>
+
+  <!-- Factores de Riesgo -->
+  <div *ngIf="data.predictions?.riskFactors" class="risks-section">
+    <h3>Factores de Riesgo Identificados</h3>
+    
+    <mat-list>
+      <mat-list-item *ngFor="let risk of data.predictions.riskFactors">
+        <mat-icon matListIcon>warning</mat-icon>
+        <div matLine>{{ risk }}</div>
+      </mat-list-item>
+    </mat-list>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    Guardar Análisis
+  </button>
+</mat-dialog-actions>

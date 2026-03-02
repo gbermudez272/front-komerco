@@ -1,0 +1,89 @@
+<mat-card class="product-card" *ngIf="product">
+  <mat-card-header>
+    <div class="card-header">
+      <div>
+        <mat-card-title>{{ product.name }}</mat-card-title>
+        <mat-card-subtitle>{{ product.id }} • {{ product.category }}</mat-card-subtitle>
+      </div>
+      <div class="stock-badge" [class]="getStockStatus().color">
+        {{ getStockStatus().text }}
+      </div>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="product-metrics">
+      <div class="metric">
+        <div class="metric-label">Stock Actual</div>
+        <div class="metric-value">{{ product.currentStock | number }}</div>
+        <div class="metric-unit">unidades</div>
+      </div>
+      
+      <div class="metric">
+        <div class="metric-label">Demanda Semanal</div>
+        <div class="metric-value">{{ product.weeklyDemand | number }}</div>
+        <div class="metric-unit">unidades</div>
+      </div>
+      
+      <div class="metric">
+        <div class="metric-label">Precio</div>
+        <div class="metric-value">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="metric-unit">por unidad</div>
+      </div>
+      
+      <div class="metric">
+        <div class="metric-label">Tendencia</div>
+        <div class="metric-value trend" [class]="getDemandTrend().color">
+          <mat-icon>{{ getDemandTrend().icon }}</mat-icon>
+          {{ getDemandTrend().text }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Section -->
+    <div *ngIf="showAnalysis" class="analysis-section">
+      <mat-divider></mat-divider>
+      
+      <div class="analysis-metrics">
+        <div class="analysis-metric">
+          <mat-icon>schedule</mat-icon>
+          <div>
+            <div class="analysis-label">Tiempo de Entrega</div>
+            <div class="analysis-value">{{ product.leadTime || 7 }} días</div>
+          </div>
+        </div>
+        
+        <div class="analysis-metric">
+          <mat-icon>inventory_2</mat-icon>
+          <div>
+            <div class="analysis-label">Stock Seguridad</div>
+            <div class="analysis-value">{{ product.safetyStock || 200 }} unidades</div>
+          </div>
+        </div>
+        
+        <div class="analysis-metric">
+          <mat-icon>update</mat-icon>
+          <div>
+            <div class="analysis-label">Último Pedido</div>
+            <div class="analysis-value">{{ product.lastOrderDate || '2024-01-15' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions *ngIf="showAnalysis">
+    <button mat-button color="primary">
+      <mat-icon>edit</mat-icon>
+      Editar
+    </button>
+    <button mat-button color="warn">
+      <mat-icon>warning</mat-icon>
+      Alerta Stock
+    </button>
+    <button mat-button color="accent">
+      <mat-icon>analytics</mat-icon>
+      Detalles
+    </button>
+  </mat-card-actions>
+</mat-card>
