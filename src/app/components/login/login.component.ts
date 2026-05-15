@@ -19,25 +19,30 @@ export class LoginComponent {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      username: ['admin', Validators.required],
-      password: ['admin123', Validators.required]
+      username: ['', Validators.required],
+      password: ['', Validators.required]
     });
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.isLoading = true;
-      const { username, password } = this.loginForm.value;
-      
-      // Simulate API call
-      setTimeout(() => {
-        if (this.authService.login(username, password)) {
+    if (!this.loginForm.valid) return;
+    this.isLoading = true;
+    this.errorMessage = '';
+    const { username, password } = this.loginForm.value;
+
+    this.authService.login(username, password).subscribe({
+      next: ok => {
+        this.isLoading = false;
+        if (ok) {
           this.router.navigate(['/dashboard']);
         } else {
           this.errorMessage = 'Credenciales incorrectas';
         }
+      },
+      error: () => {
         this.isLoading = false;
-      }, 1000);
-    }
+        this.errorMessage = 'No se pudo conectar con el servidor';
+      }
+    });
   }
 }

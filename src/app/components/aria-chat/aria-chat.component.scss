@@ -1,0 +1,288 @@
+/* ══════════════════════════════════════════════════════════════
+   Chat flotante Aria — FAB + ventana
+   ══════════════════════════════════════════════════════════════ */
+
+:host {
+  --aria-primary: #0071CE;
+  --aria-primary-dark: #0F2044;
+  --aria-bg: #FFFFFF;
+  --aria-bg-soft: #F7FAFD;
+  --aria-border: #E2E8F0;
+  --aria-text: #2D3748;
+  --aria-text-soft: #718096;
+}
+
+/* ── FAB ─────────────────────────────────────────────────────── */
+.aria-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--aria-primary) 0%, #0F2044 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(15, 32, 68, 0.35), 0 2px 6px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+  }
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 28px rgba(15, 32, 68, 0.45);
+  }
+
+  &:active { transform: translateY(0) scale(0.98); }
+
+  &.is-open {
+    background: #E53E3E;
+    &:hover { background: #C53030; }
+  }
+}
+
+/* ── Ventana del chat ────────────────────────────────────────── */
+.aria-window {
+  position: fixed;
+  right: 24px;
+  bottom: 100px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 540px;
+  max-height: calc(100vh - 140px);
+  background: var(--aria-bg);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15, 32, 68, 0.3), 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1001;
+  animation: aria-pop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes aria-pop {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.aria-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, var(--aria-primary) 0%, var(--aria-primary-dark) 100%);
+  color: #fff;
+}
+
+.aria-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aria-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.aria-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+
+  strong { font-size: 14px; font-weight: 700; }
+  small  { font-size: 11px; opacity: 0.8; }
+}
+
+.aria-actions {
+  display: flex;
+  gap: 2px;
+
+  button {
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+/* ── Lista de mensajes ───────────────────────────────────────── */
+.aria-messages {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  background: var(--aria-bg-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aria-empty {
+  margin: auto;
+  text-align: center;
+  color: var(--aria-text-soft);
+  padding: 24px 16px;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: var(--aria-primary);
+    opacity: 0.6;
+  }
+
+  p {
+    margin: 12px 0 0;
+    font-size: 14px;
+  }
+}
+
+.aria-msg {
+  display: flex;
+
+  .bubble {
+    max-width: 78%;
+    padding: 9px 12px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  &.from-user {
+    justify-content: flex-end;
+    .bubble {
+      background: var(--aria-primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+  }
+
+  &.from-aria {
+    justify-content: flex-start;
+    .bubble {
+      background: #fff;
+      color: var(--aria-text);
+      border: 1px solid var(--aria-border);
+      border-bottom-left-radius: 4px;
+    }
+  }
+
+  &.is-error .bubble {
+    background: #FED7D7;
+    color: #9B2C2C;
+    border-color: #FEB2B2;
+  }
+}
+
+/* Indicador de "escribiendo" */
+.dots {
+  display: inline-flex;
+  gap: 4px;
+  padding: 2px 0;
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--aria-text-soft);
+    display: inline-block;
+    animation: dot-pulse 1.2s infinite ease-in-out;
+  }
+
+  i:nth-child(2) { animation-delay: 0.18s; }
+  i:nth-child(3) { animation-delay: 0.36s; }
+}
+
+@keyframes dot-pulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+
+/* ── Footer / input ──────────────────────────────────────────── */
+.aria-footer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--aria-border);
+  background: #fff;
+}
+
+.aria-input {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--aria-border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  max-height: 120px;
+  outline: none;
+  transition: border-color 0.15s;
+  background: var(--aria-bg-soft);
+
+  &:focus { border-color: var(--aria-primary); background: #fff; }
+  &:disabled { opacity: 0.7; cursor: not-allowed; }
+}
+
+.aria-send {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: var(--aria-primary);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+  &:hover:not(:disabled) { background: #005EA9; }
+  &:active:not(:disabled) { transform: scale(0.96); }
+  &:disabled { background: #CBD5E0; cursor: not-allowed; }
+}
+
+/* ── Responsive: pantallas pequeñas ──────────────────────────── */
+@media (max-width: 480px) {
+  .aria-window {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    bottom: 92px;
+  }
+  .aria-fab { right: 16px; bottom: 16px; }
+}

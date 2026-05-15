@@ -107,7 +107,7 @@
                   <td>
                     <div class="product-name-cell">
                       <strong>{{ p.name }}</strong>
-                      <span class="product-id-label">{{ p.id }}</span>
+                      <span class="product-id-label">{{ getWmCodeForUpc(p.id, p.name) || p.id }}</span>
                     </div>
                   </td>
                   <td><span class="category-tag">{{ p.category }}</span></td>
@@ -225,7 +225,13 @@
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Artículo</th>
             <td mat-cell *matCellDef="let p">
-              <div class="product-info"><strong>{{p.name}}</strong><span class="category">{{p.category}}</span></div>
+              <div class="product-info">
+                <strong>
+                  {{p.name}}
+                  <span class="wm-code" *ngIf="getWmCodeForUpc(p.id, p.name) as wm">· {{ wm }}</span>
+                </strong>
+                <span class="category">{{p.category}}</span>
+              </div>
             </td>
           </ng-container>
 
@@ -321,7 +327,10 @@
           Volver al Operativo
         </button>
         <div class="current-product">
-          <h3>Análisis: {{selectedProduct.name}}</h3>
+          <h3>
+            Análisis: {{selectedProduct.name}}
+            <span class="wm-code" *ngIf="getWmCodeForUpc(selectedProduct.id, selectedProduct.name) as wm">· {{ wm }}</span>
+          </h3>
           <span class="product-id">{{selectedProduct.id}}</span>
           <span class="semaphore-chip ml-8" [ngClass]="getDohChipClass(selectedProduct.doh)">
             DOH: {{ selectedProduct.doh }} días
@@ -519,7 +528,10 @@
             <tbody>
               <tr *ngFor="let p of filteredBtsProducts" [class.row-red]="p.doh < 50" [class.row-orange]="p.doh >= 50 && p.doh < 60">
                 <td><span class="abc-badge" [class.abc-a]="p.abc === 'A'">{{ p.abc }}</span></td>
-                <td class="name-cell" [title]="p.name">{{ p.name.length > 30 ? (p.name | slice:0:28) + '…' : p.name }}</td>
+                <td class="name-cell" [title]="p.name + (getWmCodeForUpc(p.id, p.name) ? ' · ' + getWmCodeForUpc(p.id, p.name) : '')">
+                  {{ p.name.length > 30 ? (p.name | slice:0:28) + '…' : p.name }}
+                  <span class="wm-code" *ngIf="getWmCodeForUpc(p.id, p.name) as wm">· {{ wm }}</span>
+                </td>
                 <td>{{ p.category }}</td>
                 <td>{{ p.cedis }}</td>
                 <td>{{ p.formato }}</td>
@@ -576,7 +588,10 @@
               <tr *ngFor="let o of orderLines">
                 <td>{{ o.cedis }}</td>
                 <td>{{ o.formato }}</td>
-                <td class="name-cell">{{ o.articulo }}</td>
+                <td class="name-cell">
+                  {{ o.articulo }}
+                  <span class="wm-code" *ngIf="getWmCodeForUpc(o.upc, o.articulo) as wm">· {{ wm }}</span>
+                </td>
                 <td class="num-cell">{{ o.unidadesNecesarias }}</td>
                 <td class="num-cell">{{ o.cajasRequeridas }}</td>
                 <td class="num-cell">{{ o.unidadesTotales }}</td>
@@ -675,7 +690,10 @@
             <div class="store-detail-title">
               <mat-icon>store</mat-icon>
               <div>
-                <h4>{{ selectedBubble.desc }}</h4>
+                <h4>
+                  {{ selectedBubble.desc }}
+                  <span class="wm-code" *ngIf="getWmCode(selectedBubble.itemNbr) as wm">· {{ wm }}</span>
+                </h4>
                 <span class="store-detail-sub">
                   CEDIS: {{ selectedBubble.whseNbr }} &nbsp;·&nbsp;
                   Formato: {{ selectedBubble.formato }} &nbsp;·&nbsp;
@@ -803,7 +821,11 @@
         <div *ngIf="selectedBubble" class="no-enviar-panel">
           <div class="no-enviar-header">
             <mat-icon>rule</mat-icon>
-            <span>Regla de Envío · <b>{{ selectedBubble.desc }}</b> · CEDIS {{ selectedBubble.whseNbr }} · {{ selectedBubble.formato }}</span>
+            <span>
+              Regla de Envío · <b>{{ selectedBubble.desc }}</b>
+              <span class="wm-code" *ngIf="getWmCode(selectedBubble.itemNbr) as wm">· {{ wm }}</span>
+              · CEDIS {{ selectedBubble.whseNbr }} · {{ selectedBubble.formato }}
+            </span>
           </div>
 
           <!-- Config sliders -->
@@ -1144,7 +1166,10 @@
                 <td><span class="formato-badge">{{ r.formato }}</span></td>
                 <td class="num">{{ r.whseNbr }}</td>
                 <td class="num">{{ r.itemNbr }}</td>
-                <td class="desc-cell">{{ r.itemDesc }}</td>
+                <td class="desc-cell">
+                  {{ r.itemDesc }}
+                  <span class="wm-code" *ngIf="getWmCode(r.itemNbr) as wm">· {{ wm }}</span>
+                </td>
                 <td class="num">{{ r.onHand | number:'1.0-0' }}</td>
                 <td class="num">{{ r.invTotal | number:'1.0-0' }}</td>
                 <td class="num" [class.cob-low]="r.coberturaActual < r.leadTime">{{ r.coberturaActual | number:'1.1-1' }}d</td>
@@ -1182,7 +1207,10 @@
                 <td class="num">{{ r.whseNbr }}</td>
                 <td><span class="formato-badge">{{ r.formato }}</span></td>
                 <td class="num">{{ r.itemNbr }}</td>
-                <td class="desc-cell">{{ r.itemDesc }}</td>
+                <td class="desc-cell">
+                  {{ r.itemDesc }}
+                  <span class="wm-code" *ngIf="getWmCode(r.itemNbr) as wm">· {{ wm }}</span>
+                </td>
                 <td class="num">{{ r.nTiendas }}</td>
                 <td class="num bold primary">{{ r.totalVndpk | number:'1.0-0' }}</td>
                 <td class="num">{{ r.vndpk }}</td>
@@ -1282,7 +1310,10 @@
                 </span>
               </td>
               <td class="num-cell">{{ r.itemNbr }}</td>
-              <td class="ff-desc" [title]="r.desc">{{ r.desc.length > 28 ? (r.desc | slice:0:26) + '…' : r.desc }}</td>
+              <td class="ff-desc" [title]="r.desc + (getWmCode(r.itemNbr) ? ' · ' + getWmCode(r.itemNbr) : '')">
+                {{ r.desc.length > 28 ? (r.desc | slice:0:26) + '…' : r.desc }}
+                <span class="wm-code" *ngIf="getWmCode(r.itemNbr) as wm">· {{ wm }}</span>
+              </td>
               <td><span class="formato-badge">{{ r.formato }}</span></td>
               <td class="num-cell">{{ r.pipeline | number:'1.0-0' }}</td>
               <td class="num-cell">{{ r.acumConsumo | number:'1.0-0' }}</td>
@@ -1425,7 +1456,10 @@
               <td class="num-cell">Sem. {{ a.semana }}</td>
               <td class="num-cell"><b>{{ a.semanasHasta }}</b> sem.</td>
               <td class="num-cell">{{ a.itemNbr }}</td>
-              <td class="ff-desc" [title]="a.desc">{{ a.desc.length > 26 ? (a.desc | slice:0:24) + '…' : a.desc }}</td>
+              <td class="ff-desc" [title]="a.desc + (getWmCode(a.itemNbr) ? ' · ' + getWmCode(a.itemNbr) : '')">
+                {{ a.desc.length > 26 ? (a.desc | slice:0:24) + '…' : a.desc }}
+                <span class="wm-code" *ngIf="getWmCode(a.itemNbr) as wm">· {{ wm }}</span>
+              </td>
               <td><span class="formato-badge">{{ a.formato }}</span></td>
               <td class="num-cell">{{ a.ventaEst | number:'1.0-0' }}</td>
               <td class="num-cell">

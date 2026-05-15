@@ -853,6 +853,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  /** Devuelve el código Walmart (WM…) asociado al itemNbr para mostrar en plantillas. */
+  getWmCode(itemNbr: number | null | undefined): string {
+    if (itemNbr == null) return '';
+    return this.dataService.getVsnByItemNbr(itemNbr);
+  }
+
+  /**
+   * Devuelve el código WM por UPC / id de producto. Si no hay match por UPC, intenta
+   * cruzar por descripción contra el CSV cargado y contra `bts-items.json`.
+   */
+  getWmCodeForUpc(idOrUpc: string | null | undefined, desc?: string | null): string {
+    return this.dataService.getWmCodeByUpc(idOrUpc, desc);
+  }
+
   sortStoreBy(col: keyof BtsStoreDetail | 'priority'): void {
     if (this.btsStoreDetailSort === col) {
       this.btsStoreDetailDir = this.btsStoreDetailDir === 'asc' ? 'desc' : 'asc';

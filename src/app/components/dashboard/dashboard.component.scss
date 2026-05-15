@@ -3,6 +3,21 @@
    Brand: Navy #0F2044 | Walmart Blue #0071CE | Light Blue #41B6E6
    ══════════════════════════════════════════════════════════════════════ */
 
+/* Código Walmart (VSN) que se muestra al lado del nombre del artículo */
+.wm-code {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #E6F2FB;
+  color: #0071CE;
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
 /* ── Layout ─────────────────────────────────────────────────────────── */
 .dashboard-container {
   display: flex;

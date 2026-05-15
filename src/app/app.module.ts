@@ -41,6 +41,7 @@ import { DataService } from './services/data.service';
 import { CsvViewerComponent } from './components/csv-viewer/csv-viewer.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { PredictionDialogComponent } from './components/dialogs/prediction-dialog/prediction-dialog.component';
+import { AriaChatComponent } from './components/aria-chat/aria-chat.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,7 @@ import { PredictionDialogComponent } from './components/dialogs/prediction-dialo
     PredictiveChartComponent,
     CsvViewerComponent,
     PredictionDialogComponent,
-
+    AriaChatComponent,
   ],
   imports: [
     BrowserModule,

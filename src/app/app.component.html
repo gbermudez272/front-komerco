@@ -5,3 +5,6 @@
 <div class="app-container" [class.with-header]="showHeader">
   <router-outlet></router-outlet>
 </div>
+
+<!-- Chat flotante con Aria (solo cuando hay sesión, no en login) -->
+<app-aria-chat *ngIf="showHeader"></app-aria-chat>

@@ -173,6 +173,7 @@ export class DataService {
   private btsWeekly2024Subject  = new BehaviorSubject<BtsWeekly2024[]>([]);
   private btsStoreGroupsSubject = new BehaviorSubject<BtsStoreGroup[]>([]);
   private storeCatalogMap       = new Map<number, StoreCatalogEntry>();
+  private vsnByItemNbr          = new Map<number, string>();
 
   products$:        Observable<Product[]>        = this.productsSubject.asObservable();
   csvProducts$:     Observable<CSVProduct[]>     = this.csvProductsSubject.asObservable();
@@ -187,7 +188,11 @@ export class DataService {
   }
 
   private loadBtsRealData(): void {
-    this.http.get<BtsItemKPI[]>('assets/bts-items.json').subscribe(d => this.btsItemsSubject.next(d));
+    this.http.get<BtsItemKPI[]>('assets/bts-items.json').subscribe(d => {
+      this.vsnByItemNbr.clear();
+      d.forEach(it => { if (it.vsn) this.vsnByItemNbr.set(it.itemNbr, it.vsn); });
+      this.btsItemsSubject.next(d);
+    });
     this.http.get<BtsWeekly2026[]>('assets/bts-weekly-2026.json').subscribe(d => this.btsWeekly2026Subject.next(d));
     this.http.get<BtsWeekly2024[]>('assets/bts-weekly-2024.json').subscribe(d => this.btsWeekly2024Subject.next(d));
     this.http.get<BtsStoreGroup[]>('assets/bts-store-groups.json').subscribe(d => this.btsStoreGroupsSubject.next(d));
@@ -331,6 +336,84 @@ export class DataService {
       totalResurtible: items.reduce((s, i) => s + i.resurtible, 0),
       totalItems:     n,
     };
+  }
+
+  /** Devuelve el código Walmart (VSN, suele iniciar con WM) para un itemNbr, o '' si no se encuentra. */
+  getVsnByItemNbr(itemNbr: number): string {
+    return this.vsnByItemNbr.get(itemNbr) || '';
+  }
+
+  /**
+   * Devuelve el código WM asociado a un producto.
+   * Estrategia (en orden):
+   *   1. UPC directo en CSV (`codigoWM2`)
+   *   2. ID generado `CSV-NNN` → índice en CSVProduct[]
+   *   3. Si se pasa `desc`: descripción contra CSVProduct.descripcion (token match)
+   *   4. Si se pasa `desc`: descripción contra BtsItemKPI.desc → devuelve su `vsn`
+   * Devuelve '' si no hay coincidencia.
+   */
+  getWmCodeByUpc(idOrUpc: string | null | undefined, desc?: string | null): string {
+    // 1 & 2: lookup por id/UPC
+    if (idOrUpc) {
+      const byUpc = this.csvProductsSubject.value.find(csv => csv.upc === idOrUpc);
+      if (byUpc?.codigoWM2) return byUpc.codigoWM2;
+
+      const m = /^CSV-(\d+)$/.exec(idOrUpc);
+      if (m) {
+        const idx = parseInt(m[1], 10) - 1;
+        const csv = this.csvProductsSubject.value[idx];
+        if (csv?.codigoWM2) return csv.codigoWM2;
+      }
+    }
+
+    // 3 & 4: fallback por descripción
+    if (desc) {
+      const norm = this.normalizeDescForMatch(desc);
+      if (norm) {
+        for (const csv of this.csvProductsSubject.value) {
+          if (csv.codigoWM2 && this.descMatches(norm, this.normalizeDescForMatch(csv.descripcion))) {
+            return csv.codigoWM2;
+          }
+        }
+        for (const item of this.btsItemsSubject.value) {
+          if (item.vsn && this.descMatches(norm, this.normalizeDescForMatch(item.desc))) {
+            return item.vsn;
+          }
+        }
+      }
+    }
+
+    return '';
+  }
+
+  /** Normaliza una descripción para comparación: lowercase, sin acentos, sin prefijo P&G, sin signos. */
+  private normalizeDescForMatch(s: string): string {
+    if (!s) return '';
+    return s
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/^p[+&]?g\s*/i, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /** Match: ≥2 tokens en común, o ≥1 token "largo" (≥6 chars), o que una descripción contenga la otra. */
+  private descMatches(a: string, b: string): boolean {
+    if (!a || !b) return false;
+    if (a === b) return true;
+    if (a.length >= 6 && b.length >= 6 && (a.includes(b) || b.includes(a))) return true;
+    const tokensA = new Set(a.split(' ').filter(t => t.length > 3));
+    if (tokensA.size === 0) return false;
+    let matches = 0;
+    let longMatch = false;
+    for (const t of b.split(' ')) {
+      if (t.length > 3 && tokensA.has(t)) {
+        matches++;
+        if (t.length >= 6) longMatch = true;
+      }
+    }
+    return matches >= 2 || (matches >= 1 && longMatch);
   }
 
   getBtsItems():        BtsItemKPI[]     { return this.btsItemsSubject.value; }

@@ -1,0 +1,72 @@
+<!-- Botón flotante (FAB) -->
+<button
+  type="button"
+  class="aria-fab"
+  [class.is-open]="isOpen"
+  (click)="toggle()"
+  [attr.aria-label]="isOpen ? 'Cerrar chat de Aria' : 'Abrir chat de Aria'">
+  <mat-icon>{{ isOpen ? 'close' : 'chat' }}</mat-icon>
+</button>
+
+<!-- Ventana del chat -->
+<div class="aria-window" *ngIf="isOpen" role="dialog" aria-label="Chat con Aria">
+
+  <header class="aria-header">
+    <div class="aria-title">
+      <span class="aria-avatar"><mat-icon>smart_toy</mat-icon></span>
+      <div class="aria-meta">
+        <strong>Aria</strong>
+        <small>Asistente Kommerco</small>
+      </div>
+    </div>
+    <div class="aria-actions">
+      <button mat-icon-button (click)="clear()" [disabled]="loading || messages.length === 0" title="Limpiar conversación">
+        <mat-icon>delete_sweep</mat-icon>
+      </button>
+      <button mat-icon-button (click)="toggle()" title="Cerrar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <div class="aria-messages" #msgScroll>
+    <div class="aria-empty" *ngIf="messages.length === 0">
+      <mat-icon>auto_awesome</mat-icon>
+      <p>Hola, soy <strong>Aria</strong>. Pregúntame lo que necesites.</p>
+    </div>
+
+    <div
+      *ngFor="let m of messages"
+      class="aria-msg"
+      [class.from-user]="m.role === 'user'"
+      [class.from-aria]="m.role === 'aria'"
+      [class.is-error]="m.error">
+      <div class="bubble">
+        <span *ngIf="!m.pending">{{ m.text }}</span>
+        <span class="dots" *ngIf="m.pending">
+          <i></i><i></i><i></i>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="aria-footer">
+    <textarea
+      #msgInput
+      class="aria-input"
+      rows="1"
+      placeholder="Escribe tu mensaje…"
+      [(ngModel)]="draft"
+      (keydown)="onKeydown($event)"
+      [disabled]="loading"></textarea>
+    <button
+      type="button"
+      class="aria-send"
+      (click)="send()"
+      [disabled]="!draft.trim() || loading"
+      title="Enviar">
+      <mat-icon>send</mat-icon>
+    </button>
+  </footer>
+
+</div>
